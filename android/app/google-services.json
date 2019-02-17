@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "771306649816",
+    "firebase_url": "https://flex2-54ea3.firebaseio.com",
+    "project_id": "flex2-54ea3",
+    "storage_bucket": "flex2-54ea3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771306649816:android:8011d07e5c411c02",
+        "android_client_info": {
+          "package_name": "com.mohak.echo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "771306649816-5q5ioold343re4cpun4jr6a58lkjnrba.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOJao9KmpZV5nUS--RQiWcBmD7Tx_sPqg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

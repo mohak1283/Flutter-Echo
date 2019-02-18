@@ -1,8 +1,26 @@
 import 'dart:async';
+import 'package:echo/detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:translator/translator.dart';
+import 'package:speech_recognition/speech_recognition.dart';
+
+
+const languages = const [
+  const Language('Francais', 'fr_FR'),
+  const Language('English', 'en_US'),
+  const Language('Pусский', 'ru_RU'),
+  const Language('Italiano', 'it_IT'),
+  const Language('Español', 'es_ES'),
+];
+
+class Language {
+  final String name;
+  final String code;
+
+  const Language(this.name, this.code);
+}
 
 class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
@@ -19,18 +37,47 @@ class _HomeScreenState extends State<HomeScreen> {
   var stringsArray = [];
   StringBuffer myString = new StringBuffer(" ");
 
-  var _languages = ["English", "French", "Chinese", "Sanskrit"];
+  var _languages = ["English", "French"];
+  //var _speech;
 
   var current;
+  SpeechRecognition _speech;
+
+  bool _speechRecognitionAvailable = false;
+  bool _isListening = false;
+
+  String transcription = '';
+
+  //String _currentLocale = 'en_US';
+  Language selectedLang = languages.first;
+  
 
   @override
   void initState() {
     super.initState();
+     _speech = SpeechRecognition();
+    activateSpeechRecognizer();
     subscription = databaseReference.onChildAdded.listen((event) {
       setState(() {
         data = event.snapshot.value;
       });
-    });
+    });   
+  }
+
+    // Platform messages are asynchronous, so we initialize in an async method.
+  void activateSpeechRecognizer() {
+    print('_MyAppState.activateSpeechRecognizer... ');
+    _speech = new SpeechRecognition();
+    _speech.setAvailabilityHandler(onSpeechAvailability);
+    _speech.setCurrentLocaleHandler(onCurrentLocale);
+    _speech.setRecognitionStartedHandler(onRecognitionStarted);
+    _speech.setRecognitionResultHandler(onRecognitionResult);
+    _speech.setRecognitionCompleteHandler(onRecognitionComplete);
+    
+    //_speech.setErrorHandler(errorHandler);
+    _speech
+        .activate()
+        .then((res) => setState(() => _speechRecognitionAvailable = res));
   }
 
   @override
@@ -46,6 +93,12 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text("Echo"),
         centerTitle: true,
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.mic, color: Colors.white,),
+         onPressed: _speechRecognitionAvailable && !_isListening
+                        ? () => start()
+                        : null,
       ),
       body: Center(
         child: Column(
@@ -96,34 +149,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 value: current,
               ),
-              //       child: DropdownButton<String>(
-              //             items: _priorities.map((String dropDownStringItem) {
-              //               return DropdownMenuItem<String>(
-              //                 value: dropDownStringItem,
-              //                 child: Text(dropDownStringItem),
-              //               );
-              //             }).toList(),
-              //             onChanged: (String newItemSelected) {
-              //               updatePriorityAsInt(newItemSelected);
-              //             },
-              //             style: textStyle,
-              //             value: updatePriorityAsString(note.priority),
-              //           ),
-              //         ),
-
-              // )
-              // Padding(
-              //   padding: const EdgeInsets.all(8.0),
-              //   child: Container(
-              //     width: 300.0,
-              //     height: 450.0,
-              //     decoration: BoxDecoration(
-              //         image: DecorationImage(
-              //             image: AssetImage('assets/test.gif'),
-              //             fit: BoxFit.cover)),
-              //   ),
-              // )
-            )
+            
+            ),
+            // RaisedButton(
+            //   child: Text("Record",style: TextStyle(color: Colors.white),),
+            //   color: Colors.blue,
+            //    onPressed: _speechRecognitionAvailable && !_isListening
+            //             ? () => start()
+            //             : null,
+            //         // label: _isListening
+            //         //     ? 'Listening...'
+            //         //     : 'Listen (${selectedLang.code})',
+            // )
           ],
         ),
       ),
@@ -304,16 +341,55 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
-    // await flutterTts.speak(data);
-
-    // translator.translate(data, to: 'hi').then((s) {
-    //   print("Source: " +
-    //       data +
-    //       "\n"
-    //       "Translated: " +
-    //       s +
-    //       "\n");
-    //   // flutterTts.speak(s);
-    // });
+  
   }
-}
+
+    void start() => _speech
+      .listen(locale: selectedLang.code)
+      .then(( result) => print('RESULT :  ${result.toString()}'));
+
+  void cancel() =>
+      _speech.cancel().then((result) => setState(() => _isListening = result));
+
+  void stop() => _speech.stop().then((result) {
+        setState(() => _isListening = result);
+      });
+
+  void onSpeechAvailability(bool result) =>
+      setState(() => _speechRecognitionAvailable = result);
+
+  void onCurrentLocale(String locale) {
+    print('_MyAppState.onCurrentLocale... $locale');
+    setState(
+        () => selectedLang = languages.firstWhere((l) => l.code == locale));
+  }
+
+  void onRecognitionStarted() => setState(() => _isListening = true);
+
+
+  void onRecognitionResult(String text){
+    setState(() {
+     transcription = text; 
+     print("Transcription : $transcription");
+    });
+   
+  }
+
+  void onRecognitionComplete(){
+    setState(() {
+     _isListening =false; 
+    });
+     Navigator.push(context, new MaterialPageRoute(
+      builder: ((context) => new DetailScreen(transcription))
+    ));
+  }
+
+  //void onRecognitionComplete() => setState(() => _isListening = false);
+
+  void errorHandler() => activateSpeechRecognizer();
+
+  }
+
+ 
+
+

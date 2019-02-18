@@ -24,6 +24,7 @@ dependencies:
   flutter_tts: 
   translator:
   easy_localization:
+  speech_recognition:
 
 dev_dependencies:
   flutter_test:

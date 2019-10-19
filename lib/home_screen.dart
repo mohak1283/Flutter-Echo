@@ -1,12 +1,17 @@
 import 'dart:async';
 
 import 'package:echo/detail_screen.dart';
+import 'package:echo/provider/settings_provider.dart';
 import 'package:echo/settings_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_recognition/speech_recognition.dart';
 import 'package:translator/translator.dart';
+
+import 'models/language.dart';
 
 const languages = const [
   const Language('Francais', 'fr_FR'),
@@ -15,13 +20,6 @@ const languages = const [
   const Language('Italiano', 'it_IT'),
   const Language('Español', 'es_ES'),
 ];
-
-class Language {
-  final String name;
-  final String code;
-
-  const Language(this.name, this.code);
-}
 
 class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
@@ -54,6 +52,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Language selectedLang = languages.first;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    get();
+  }
+
+  @override
   void initState() {
     super.initState();
     _speech = SpeechRecognition();
@@ -67,9 +71,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   get() async {
-    var voices = await flutterTts.getVoices;
-    print("Voices available : ${voices.toString()}");
-    flutterTts.setVoice('fr-fr-x-vlf#male_1-local');
+    print("Inside get");
+    SharedPreferences _sharedPreferences =
+        await SharedPreferences.getInstance();
+    String voice = _sharedPreferences.getString('voice');
+    if (voice != null && voice.isNotEmpty) {
+      flutterTts.setVoice(voice);
+    }
+
+    print("NEWVOICE : $voice");
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -97,6 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("Inside build");
     return Scaffold(
       appBar: AppBar(
         title: Text("Echo"),
@@ -104,11 +115,21 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: <Widget>[
           GestureDetector(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()));
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          ChangeNotifierProvider<SettingsProvider>(
+                            child: SettingsScreen(),
+                            builder: (context) => SettingsProvider.instance(),
+                          )));
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Icon(Icons.settings, color: Colors.white,),
+              child: Icon(
+                Icons.settings,
+                color: Colors.white,
+              ),
             ),
           )
         ],
@@ -276,9 +297,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget gifContainerWidget(String data) {
-
-
-
     if (data == " ") {
       setState(() {
         myString.write(" ");

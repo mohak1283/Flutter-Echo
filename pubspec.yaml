@@ -26,6 +26,7 @@ dependencies:
   easy_localization:
   speech_recognition:
   provider:
+  shared_preferences:
 
 dev_dependencies:
   flutter_test:

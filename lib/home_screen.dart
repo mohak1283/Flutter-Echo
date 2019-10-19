@@ -1,11 +1,12 @@
 import 'dart:async';
+
 import 'package:echo/detail_screen.dart';
+import 'package:echo/settings_screen.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:translator/translator.dart';
 import 'package:speech_recognition/speech_recognition.dart';
-
+import 'package:translator/translator.dart';
 
 const languages = const [
   const Language('Francais', 'fr_FR'),
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   StringBuffer myString = new StringBuffer(" ");
 
   var _languages = ["English", "French"];
+
   //var _speech;
 
   var current;
@@ -50,21 +52,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //String _currentLocale = 'en_US';
   Language selectedLang = languages.first;
-  
 
   @override
   void initState() {
     super.initState();
-     _speech = SpeechRecognition();
+    _speech = SpeechRecognition();
+    get();
     activateSpeechRecognizer();
     subscription = databaseReference.onChildAdded.listen((event) {
       setState(() {
         data = event.snapshot.value;
       });
-    });   
+    });
   }
 
-    // Platform messages are asynchronous, so we initialize in an async method.
+  get() async {
+    var voices = await flutterTts.getVoices;
+    print("Voices available : ${voices.toString()}");
+    flutterTts.setVoice('fr-fr-x-vlf#male_1-local');
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
   void activateSpeechRecognizer() {
     print('_MyAppState.activateSpeechRecognizer... ');
     _speech = new SpeechRecognition();
@@ -73,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _speech.setRecognitionStartedHandler(onRecognitionStarted);
     _speech.setRecognitionResultHandler(onRecognitionResult);
     _speech.setRecognitionCompleteHandler(onRecognitionComplete);
-    
+
     //_speech.setErrorHandler(errorHandler);
     _speech
         .activate()
@@ -93,12 +101,25 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text("Echo"),
         centerTitle: true,
+        actions: <Widget>[
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Icon(Icons.settings, color: Colors.white,),
+            ),
+          )
+        ],
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.mic, color: Colors.white,),
-         onPressed: _speechRecognitionAvailable && !_isListening
-                        ? () => start()
-                        : null,
+        child: Icon(
+          Icons.mic,
+          color: Colors.white,
+        ),
+        onPressed:
+            _speechRecognitionAvailable && !_isListening ? () => start() : null,
       ),
       body: Center(
         child: Column(
@@ -149,7 +170,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 value: current,
               ),
-            
             ),
             // RaisedButton(
             //   child: Text("Record",style: TextStyle(color: Colors.white),),
@@ -256,6 +276,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget gifContainerWidget(String data) {
+
+
+
     if (data == " ") {
       setState(() {
         myString.write(" ");
@@ -314,7 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
         print("Source: " +
             data +
             "\n"
-            "Translated: " +
+                "Translated: " +
             s +
             "\n");
         flutterTts.speak(s);
@@ -324,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
         print("Source: " +
             data +
             "\n"
-            "Translated: " +
+                "Translated: " +
             s +
             "\n");
         flutterTts.speak(s);
@@ -334,19 +357,17 @@ class _HomeScreenState extends State<HomeScreen> {
         print("Source: " +
             data +
             "\n"
-            "Translated: " +
+                "Translated: " +
             s +
             "\n");
         flutterTts.speak(s);
       });
     }
-
-  
   }
 
-    void start() => _speech
+  void start() => _speech
       .listen(locale: selectedLang.code)
-      .then(( result) => print('RESULT :  ${result.toString()}'));
+      .then((result) => print('RESULT :  ${result.toString()}'));
 
   void cancel() =>
       _speech.cancel().then((result) => setState(() => _isListening = result));
@@ -366,30 +387,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void onRecognitionStarted() => setState(() => _isListening = true);
 
-
-  void onRecognitionResult(String text){
+  void onRecognitionResult(String text) {
     setState(() {
-     transcription = text; 
-     print("Transcription : $transcription");
+      transcription = text;
+      print("Transcription : $transcription");
     });
-   
   }
 
-  void onRecognitionComplete(){
+  void onRecognitionComplete() {
     setState(() {
-     _isListening =false; 
+      _isListening = false;
     });
-     Navigator.push(context, new MaterialPageRoute(
-      builder: ((context) => new DetailScreen(transcription))
-    ));
+    Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: ((context) => new DetailScreen(transcription))));
   }
 
   //void onRecognitionComplete() => setState(() => _isListening = false);
 
   void errorHandler() => activateSpeechRecognizer();
-
-  }
-
- 
-
-
+}

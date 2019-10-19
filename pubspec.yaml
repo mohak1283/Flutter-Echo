@@ -21,10 +21,11 @@ dependencies:
   cupertino_icons: ^0.1.2
   firebase_storage:
   firebase_database:
-  flutter_tts: 
+  flutter_tts: ^0.2.3
   translator:
   easy_localization:
   speech_recognition:
+  provider:
 
 dev_dependencies:
   flutter_test:

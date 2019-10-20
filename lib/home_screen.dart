@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
     print("Inside build");
     return Scaffold(
       appBar: AppBar(
-        title: Text("Echo"),
+        title: Text("Echoo"),
         centerTitle: true,
         actions: <Widget>[
           GestureDetector(
@@ -161,65 +161,60 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: _speechRecognitionAvailable && !_isListening ? () => start() : null,
           child: Icon(Icons.mic),
       ),
-//      floatingActionButton: FloatingActionButton.extended(
-//        label: Text('Speak'),
-//        icon: Icon(Icons.mic, color: Colors.black,),
-//        backgroundColor: Colors.white,
-//        onPressed:
-//            _speechRecognitionAvailable && !_isListening ? () => start() : null,
-//      ),
       body: Center(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Text(
-                data,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30.0,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-            gifWidget(data),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Text(
-                myString.toString(),
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30.0,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Text('Translate into : ',
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  data,
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20.0,
-                      fontStyle: FontStyle.italic)),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 4.0),
-              child: DropdownButton<String>(
-                items: _languages.map((String dropDownStringItem) {
-                  return DropdownMenuItem<String>(
-                    value: dropDownStringItem,
-                    child: Text(dropDownStringItem),
-                  );
-                }).toList(),
-                onChanged: (String newItemSelected) {
-                  setState(() {
-                    current = newItemSelected;
-                    // translateAndSpeak(data, current);
-                  });
-                },
-                value: current,
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
+              gifWidget(data),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  myString.toString(),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text('Translate into : ',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20.0,
+                        fontStyle: FontStyle.italic)),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: DropdownButton<String>(
+                  items: _languages.map((String dropDownStringItem) {
+                    return DropdownMenuItem<String>(
+                      value: dropDownStringItem,
+                      child: Text(dropDownStringItem),
+                    );
+                  }).toList(),
+                  onChanged: (String newItemSelected) {
+                    setState(() {
+                      current = newItemSelected;
+                      // translateAndSpeak(data, current);
+                    });
+                  },
+                  value: current,
+                ),
+              ),
 
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -228,10 +223,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget gifWidget(String data) {
     print("Data : $data");
 
-    if (data == 'Emergency Call') {
+    if (data == 'Emergency Call' || data == 'emergency call' || data == 'Emergency call') {
       callUser();
-    } else if (data == 'MESSAGE') {
+    } else if (data == 'MESSAGE' || data == 'message' || data == 'Message') {
       sendMessage();
+    } else if(data == 'Yes absolutely, it\'s obvious' || data == 'yes absolutely, it\'s obvious' || data == 'Yes Absolutely, it\'s obvious') {
+      setState(() {
+        myString.write("Yes absolutely, it\'s obvious");
+      });
+      _speak(myString.toString(), current);
+    } else if(data == 'Thank you everyone' || data == 'Thank You everyone') {
+      setState(() {
+        myString.write("Thank you everyone");
+      });
+      _speak(myString.toString(), current);
     }
 
     switch (data) {

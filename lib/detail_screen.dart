@@ -32,11 +32,12 @@ class _DetailScreenState extends State<DetailScreen> {
         title: Text("Next"),
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(widget.text,
               style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20.0,
+                  fontSize: 40.0,
                   fontStyle: FontStyle.italic)),
 
           displayGifImage(widget.text),
@@ -63,21 +64,24 @@ class _DetailScreenState extends State<DetailScreen> {
         imageUrl = 'assets/' + '${data[i].toUpperCase()}' + '.gif';
         print("ImageUrl : $imageUrl");
 
-        Timer.periodic(Duration(microseconds: 3000), (Timer t) {
-          timer = t;
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              width: 300.0,
-              height: 450.0,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.0),
-                  image: DecorationImage(
-                      image: AssetImage(imageUrl), fit: BoxFit.cover)),
-            ),
-          );
-        });
+
+          Timer.periodic(Duration(microseconds: 3000), (Timer t) {
+            timer = t;
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                width: 300.0,
+                height: 450.0,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.0),
+                    image: DecorationImage(
+                        image: AssetImage(imageUrl), fit: BoxFit.cover)),
+              ),
+            );
+          });
       }
+      return Container();
+
     } else {
       return new Padding(
         padding: const EdgeInsets.all(8.0),

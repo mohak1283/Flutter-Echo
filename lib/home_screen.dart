@@ -5,6 +5,7 @@ import 'package:echo/provider/settings_provider.dart';
 import 'package:echo/settings_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   StringBuffer myString = new StringBuffer(" ");
 
   var _languages = ["English", "French"];
+  static const platform = const MethodChannel('samples.flutter/call');
 
   //var _speech;
 
@@ -105,6 +107,27 @@ class _HomeScreenState extends State<HomeScreen> {
     subscription?.cancel();
   }
 
+  // Get battery level.
+  String _batteryLevel = 'Unknown battery level.';
+
+  Future<void> callUser() async {
+    try {
+      final int result = await platform.invokeMethod('callUser');
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> sendMessage() async {
+    try {
+      final int result = await platform.invokeMethod('sendMessage');
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     print("Inside build");
@@ -135,13 +158,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.mic,
-          color: Colors.white,
-        ),
-        onPressed:
-            _speechRecognitionAvailable && !_isListening ? () => start() : null,
+          onPressed: _speechRecognitionAvailable && !_isListening ? () => start() : null,
+          child: Icon(Icons.mic),
       ),
+//      floatingActionButton: FloatingActionButton.extended(
+//        label: Text('Speak'),
+//        icon: Icon(Icons.mic, color: Colors.black,),
+//        backgroundColor: Colors.white,
+//        onPressed:
+//            _speechRecognitionAvailable && !_isListening ? () => start() : null,
+//      ),
       body: Center(
         child: Column(
           children: <Widget>[
@@ -192,16 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 value: current,
               ),
             ),
-            // RaisedButton(
-            //   child: Text("Record",style: TextStyle(color: Colors.white),),
-            //   color: Colors.blue,
-            //    onPressed: _speechRecognitionAvailable && !_isListening
-            //             ? () => start()
-            //             : null,
-            //         // label: _isListening
-            //         //     ? 'Listening...'
-            //         //     : 'Listen (${selectedLang.code})',
-            // )
+
           ],
         ),
       ),
@@ -209,6 +226,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget gifWidget(String data) {
+    print("Data : $data");
+
+    if (data == 'Emergency Call') {
+      callUser();
+    } else if (data == 'MESSAGE') {
+      sendMessage();
+    }
+
     switch (data) {
       case 'A':
         return gifContainerWidget('A');
@@ -291,6 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case '.':
         return gifContainerWidget('.');
         break;
+
       default:
         return gifContainerWidget(" ");
     }
@@ -336,11 +362,6 @@ class _HomeScreenState extends State<HomeScreen> {
               image: DecorationImage(
                   image: AssetImage('assets/' + '$data' + '.gif'),
                   fit: BoxFit.cover)),
-          // child: FadeInImage(
-          //   placeholder: AssetImage('assets/'),
-          //   image: AssetImage('assets/' + '$data' + '.gif'),
-          //   fit: BoxFit.cover,
-          // ),
         ),
       );
     }

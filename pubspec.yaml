@@ -27,6 +27,7 @@ dependencies:
   speech_recognition:
   provider:
   shared_preferences:
+  url_launcher:
 
 dev_dependencies:
   flutter_test:
